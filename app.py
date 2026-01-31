@@ -3,10 +3,12 @@ from searcher import EmbeddedSearcher
 from flask import Flask
 from markupsafe import escape
 
-app = Flask(__name__)
+SAMPLES_PATH = "static/items/"
+model = EmbeddedSearcher(SAMPLES_PATH)
+
+app = Flask(__name__, static_folder='static')
 
 @app.route("/")
-
 def root():
     return "<p>Hello, World!</p>"
 
@@ -18,4 +20,6 @@ def root():
 #     while True:
 #         query = input("Query: ")
 
-#         print(model.query(query,5))
+#         items = model.query(query,5)
+#         for num, file, confidence in items:
+#             print(f"{num} {file}: {confidence}")
