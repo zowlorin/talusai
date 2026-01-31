@@ -16,6 +16,9 @@ class EmbeddedSearcher():
         self.model, self.preprocess = clip.load("ViT-B/16", device=self.device)
 
         self.paths = load_image_paths(self.path)
+        if (not self.paths):
+            self.image_features = torch.empty((0, self.model.visual.output_dim), device=self.device)
+            return
 
         images = [self.preprocess(Image.open(p)).unsqueeze(0) for p in self.paths]
         image_input = torch.cat(images).to(self.device)
