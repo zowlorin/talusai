@@ -24,7 +24,7 @@ class EmbeddedSearcher():
             self.image_features = self.model.encode_image(image_input)
             self.image_features /= self.image_features.norm(dim=-1, keepdim=True)
 
-    def query(self, text, k=1):
+    def query(self, text, start=0, count=1):
         try:
             text_tokens = clip.tokenize([text]).to(self.device)
         
@@ -37,11 +37,11 @@ class EmbeddedSearcher():
 
                 probs = logits_per_text.softmax(dim=-1).cpu().numpy()[0]
 
-            data = [ ( i, self.paths[i], p ) for i, p in enumerate( probs.tolist() )]
+            data = [ (self.paths[i].replace(os.sep, "/"), p ) for i, p in enumerate( probs.tolist() )]
 
-            data.sort(reverse=True, key=(lambda x: (x[2])))
+            data.sort(reverse=True, key=(lambda x: (x[1])))
 
-            return data[0:min(k,len(data))]
+            return data[start : start + count]
 
         
         except Exception as e:

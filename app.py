@@ -1,6 +1,6 @@
 from searcher import EmbeddedSearcher
 
-from flask import Flask
+from flask import Flask, request, jsonify
 from markupsafe import escape
 
 SAMPLES_PATH = "static/items/"
@@ -8,18 +8,17 @@ model = EmbeddedSearcher(SAMPLES_PATH)
 
 app = Flask(__name__, static_folder='static')
 
-@app.route("/")
-def root():
-    return "<p>Hello, World!</p>"
+@app.route("/api/search")
+def search():
+    query = request.args.get("query", type=str)
+    start = request.args.get("start", 0, type=int)
+    count = request.args.get("count", 5, type=int)
 
-# SAMPLES_PATH = "samples/"
+    if query is None: return jsonify({ "code": 1 })
 
-# if __name__ == "__main__":
-#     model = EmbeddedSearcher(SAMPLES_PATH)
+    items = model.query(query, start, count)
+    formatted = [{ "path": path, "confidence": confidence } for path, confidence in items]
+    return jsonify(formatted)
 
-#     while True:
-#         query = input("Query: ")
-
-#         items = model.query(query,5)
-#         for num, file, confidence in items:
-#             print(f"{num} {file}: {confidence}")
+if __name__ == "__main__":
+    app.run(port=3001)
