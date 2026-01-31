@@ -42,8 +42,10 @@ def upload():
 
     filepath = f"{ITEMS}{secure_filename(file.filename)}"
     if os.path.exists(filepath): return jsonify({ "code": 3 })
+
     file.save(filepath)
-    
+    model.update()
+
     return jsonify({ "code": 0, "path": filepath })
 
 if __name__ == "__main__":

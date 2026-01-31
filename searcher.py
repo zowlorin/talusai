@@ -24,18 +24,30 @@ class EmbeddedSearcher():
             self.image_features = self.model.encode_image(image_input)
             self.image_features /= self.image_features.norm(dim=-1, keepdim=True)
 
-    def add(self, path):
-        if not os.path.exists(path): return None
-        image = self.preprocess(Image.open(path).convert("RGB")).unsqueeze(0).to(self.device)
+    def update(self):
+        new_paths = load_image_paths(self.path)
 
-        with torch.no_grad():
-            feat = self.model.encode_image(image)
-            feat /= feat.norm(dim=-1,keepdim=True)
+        added = [p for p in new_paths if p not in self.paths]
+        removed = [p for p in self.paths if p not in new_paths]
 
-        self.image_features = torch.cat([self.image_features, feat], dim=0)
-        self.paths.append(path)
-        return len(self.paths)-1
+        for removed_path in removed:
+            index = self.paths.index(removed_path)
+            self.paths.pop(index)
 
+            self.image_features = torch.cat([
+                self.image_features[:index],
+                self.image_features[index+1:]
+            ], dim=0)
+
+        for added_path in added:
+            self.paths.append(added_path)
+
+            image = self.preprocess(Image.open(added_path).convert("RGB")).unsqueeze(0).to(self.device)
+            with torch.no_grad():
+                feat = self.model.encode_image(image)
+                feat /= feat.norm(dim=-1,keepdim=True)
+
+            self.image_features = torch.cat([self.image_features, feat], dim=0)
 
     def query(self, text, start=0, count=1):
         try:
