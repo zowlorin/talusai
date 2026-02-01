@@ -6,7 +6,7 @@ import clip
 import numpy as np
 
 def load_image_paths(path):
-    return glob.glob(os.path.join(path, '*.[jJ][pP][gG]')) + glob.glob(os.path.join(path, '*.[pP][nN][gG]'))
+    return glob.glob(os.path.join(path, '*.[jJ][pP][gG]')) + glob.glob(os.path.join(path, '*.[pP][nN][gG]')) + glob.glob(os.path.join(path, '*.[jJ][pP][eE][gG]'))
 
 class EmbeddedSearcher():
     def __init__(self, path):
